@@ -1,0 +1,133 @@
+<html>
+  <head>
+    <title>GPS Platform Docs</title>
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet" type="text/css">
+    <link href="/_node_modules/vuetify/dist/vuetify.min.css" rel="stylesheet" type="text/css">
+    <link href="/_app/vendor/github.css" rel="stylesheet" type="text/css">
+    <link href="/_app/app.css" rel="stylesheet" type="text/css">
+
+    <script src="/_node_modules/vue/dist/vue.js"></script>
+    <script src="/_node_modules/vuetify/dist/vuetify.min.js"></script>
+    <script src="/_node_modules/marked/marked.min.js"></script>
+    <script src="/_node_modules/viz.js/viz.js"></script>
+    <script src="/_node_modules/svg-pan-zoom/dist/svg-pan-zoom.min.js"></script>
+    <script src="/_node_modules/tocbot/dist/tocbot.min.js"></script>
+    <script src="/_app/vendor/highlight.pack.js"></script>
+    <script src="/_app/vendor/mscgen-inpage.js"></script>
+  </head>
+  <body>
+
+    <!-- app container  -->
+    <div id="app">
+      <p>Loading...</p>
+    </div>
+
+    <!-- component templates -->
+    <script type="x-template" id="tmpl-app">
+      <v-app standalone>
+
+        <!-- sidenav -->
+        <v-navigation-drawer persistent dark v-model="showMenu">
+          <v-toolbar flat class="transparent">
+            <v-toolbar-title class="title">GPS Platform Docs</v-toolbar-title>
+          </v-toolbar>
+          <v-divider></v-divider>
+
+          <v-card class="track-toggle" dark>
+            <v-switch dark color="light-green" v-model="reloadFileChanges" label="Reload file changes"></v-switch>
+          </v-card>
+
+          <v-divider></v-divider>
+          <!-- recursive docs menu -->
+          <div class="main-menu">
+            <ul>
+              <main-menu-item @selected-item="navToItem" :item="menu" :level="0"></main-menu-item>
+            </ul>
+          </div>
+        </v-navigation-drawer>
+
+        <!-- main app toolbar & page tabs -->
+        <v-toolbar class="toolbar">
+          <v-toolbar-side-icon @click.native.stop="showMenu = !showMenu"></v-toolbar-side-icon>
+          <v-toolbar-title>
+            {{selectedItem && selectedItem.title ? selectedItem.title : 'Uh oh :('}}
+          </v-toolbar-title>
+          <v-spacer></v-spacer>
+
+          <!-- show item drop down menu w/ toggle when small -->
+          <v-menu bottom right class="hidden-md-and-up">
+            <v-btn icon slot="activator">
+              <v-icon>more_vert</v-icon>
+            </v-btn>
+            <v-list v-if="selectedItem">
+              <v-list-tile v-for="item in selectedItem.items" :key="item" @click="navToPath(selectedItem.uiRoute+'/'+item)">
+                <v-list-tile-title>{{ itemMenuName(item).toUpperCase() }}</v-list-tile-title>
+              </v-list-tile>
+            </v-list>
+          </v-menu>
+
+          <!-- otherwise list items in toolbar -->
+          <v-toolbar-items class="hidden-sm-and-down" v-if="selectedItem">
+            <v-btn class="item" :class="{active: selectedFile == item}" flat v-for="item in selectedItem.items" :key="item" @click="navToPath(selectedItem.uiRoute+'/'+item)">{{itemMenuName(item)}}</v-btn>
+          </v-toolbar-items>
+        </v-toolbar>
+
+        <!-- render selected file type -->
+        <main class="main">
+          <v-container fluid>
+            <component ref="page" :is="pageComponent" :item="selectedItem" :file="selectedFile"></component>
+          </v-container>
+        </main>
+
+      </v-app>
+    </script>
+
+    <script type="x-template" id="tmpl-main-menu-item">
+      <li class="item" >
+        <div class="label" :class="{selected: item.selected}" @click="emit(item)">{{item.title}}</div>
+        <ul v-if="item.nested">
+          <main-menu-item @selected-item="emit" v-for="nestedItem in item.nested" :key="nestedItem.title" :item="nestedItem" :level="level+1"></main-menu-item>
+        </ul>
+      </li>
+    </script>
+
+    <script type="x-template" id="tmpl-page-markdown">
+      <div class="markdown">
+        <h5 v-show="!html"><code>Empty file.</code></h5>
+        <v-card id="markdown-toc" v-show="showToc"></v-card>
+        <div id="markdown-content" v-show="html" v-html="html"></div>
+      </div>
+    </script>
+
+    <script type="x-template" id="tmpl-page-dot">
+      <div class="dot">
+        <div id="svg-target" v-if="svg" v-html="svg"></div>
+      </div>
+    </script>
+
+    <script type="x-template" id="tmpl-page-swaggerui">
+      <div id="swaggerui">
+        <iframe :src="swaggerurl" frameborder="0" width="100%" height="100%"></iframe>
+      </div>
+    </script>
+
+    <script type="x-template" id="tmpl-page-unsupported-type">
+      <div class="unsupported-type">
+        <h5>Unsupported file type: {{file}}</h5>
+      </div>
+    </script>
+
+    <script type="x-template" id="tmpl-page-empty">
+      <div class="empty">
+        <h5>Directory is empty.</h5>
+      </div>
+    </script>
+
+    <script type="x-template" id="tmpl-page-missing">
+      <v-alert error value="true">Not found: {{path}}</v-alert>
+    </script>
+
+    <script src="/_app/app.js"></script>
+  </body>
+</html>

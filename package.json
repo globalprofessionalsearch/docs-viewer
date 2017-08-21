@@ -1,0 +1,24 @@
+{
+  "name": "docs-viewer",
+  "version": "1.0.0",
+  "description": "Server for viewing text-based documentation.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chokidar": "^1.7.0",
+    "express": "^4.15.3",
+    "marked": "^0.3.6",
+    "svg-pan-zoom": "github:ariutta/svg-pan-zoom",
+    "swagger-ui-dist": "^3.1.4",
+    "tocbot": "^3.0.3",
+    "viz.js": "^1.8.0",
+    "vue": "^2.4.2",
+    "vuetify": "^0.14.8",
+    "ws": "^3.1.0"
+  }
+}

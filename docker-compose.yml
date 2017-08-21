@@ -1,0 +1,17 @@
+version: '2'
+services:
+  
+  # docker-compose run --rm dev npm install
+  dev:
+    build:
+      context: "."
+      dockerfile: "Dockerfile-dev"
+    volumes:
+      - .:/app
+  
+  dev-server:
+    extends: dev
+    command: "node server.js"
+    ports:
+      - 8100:80
+  
