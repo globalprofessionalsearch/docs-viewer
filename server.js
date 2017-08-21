@@ -8,6 +8,14 @@ var express = require('express');
 
 // TODO: add basic auth to everything, get user/pass from env variables
 
+const IGNORE = [
+  ".DS_Store",
+  ".git",
+  ".gitignore",
+  ".gitconfig",
+  ".editorconfig"
+];
+
 // recursively parse and load `docs.json` files from a starting point
 function loadDocs(basePath, baseUrl, uiRoute) {
   var p = path.join(basePath, ".docs.json");
@@ -33,6 +41,10 @@ function loadDocs(basePath, baseUrl, uiRoute) {
   items = fs.readdirSync(basePath);
   if (items.length > 0) {
     for (var name of items) {
+      if (-1 !== IGNORE.indexOf(name)) {
+        continue;
+      }
+      
       var stat = fs.statSync(path.join(basePath, name))
 
       // NOTE: any future features for `.docs.json` files would likely be checked and handled here, eg
