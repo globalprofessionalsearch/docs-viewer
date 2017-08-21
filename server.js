@@ -86,7 +86,7 @@ app.get('/_swagger-ui', function(req, res) {
         </style>
       </head>
       <body>
-        <div id="swaggerui"><div>
+        <div id="swaggerui"></div>
         <script>
           const ui = SwaggerUIBundle({
             url: "${req.query.path}",
