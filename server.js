@@ -125,6 +125,10 @@ wss.on('connection', (ws, req) => {
   });
 });
 
+// listen for TERM (kill) & INT (ctrl-c)
+process.on ('SIGTERM', () => { process.exit(); });
+process.on ('SIGINT', () => { process.exit(); });
+
 // start serving requests
 server.listen(80);
 console.log("... listening!");
