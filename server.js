@@ -83,6 +83,7 @@ app.get('/_swagger-ui', function(req, res) {
         <script src="/_node_modules/swagger-ui-dist/swagger-ui-bundle.js"></script>
         <style>
           .swagger-ui .wrapper { padding: 0px; }
+          .swagger-ui .markdown p, .swagger-ui .markdown pre { margin-bottom: 10px; }
         </style>
       </head>
       <body>
