@@ -180,6 +180,9 @@ var pageStateMixin = {
     'item.baseUrl': function() { this.update(); },
     'file': function() { this.update(); }
   },
+  computed: {
+    contentUrl: function () { return this.item.baseUrl + "/" + this.file; }
+  },
   methods: {
     // pages provide their own update methods
     update: function() {}
@@ -196,6 +199,10 @@ Vue.component('page-markdown', {
       parsedMscgen: {}
     };
   },
+
+  // after the markdown is rendered, it is post processed
+  // in several ways to convert embedded content into
+  // viewable svg, and embed a table of contents
   updated () {
     // are the headers - render table of contents if so
     if (this.html !== null && this.html != "") {
@@ -213,13 +220,13 @@ Vue.component('page-markdown', {
       }
     }
 
-    // are there `dot` codeblocks?  Replace w/ rendered SVG!
+    // are there `dot` codeblocks?  Replace w/ rendered SVG
     document.querySelectorAll('.lang-dot').forEach(function(el) {
       var svg = Viz(el.textContent);
       el.innerHTML = svg;
     });
 
-    // any msc/mscgenny?
+    // are there `mscgenny` codeblocks?  Replaec w/ rendered SVG
     const els = document.querySelectorAll('.lang-msgenny').forEach((el, i) => {
       // make sure it doesn't already have an svg
       if (null != el.querySelector('svg')) {
@@ -246,7 +253,7 @@ Vue.component('page-markdown', {
     update: function() {
       this.parsedMscgen = {};
 
-      ajaxGet(this.item.baseUrl+'/' + this.file, (res) => {
+      ajaxGet(this.contentUrl, (res) => {
         var html = marked(res, {
           gfm: true,
           tables:true,
@@ -261,9 +268,10 @@ Vue.component('page-markdown', {
   }
 });
 
-Vue.component('page-dot', {
-  template: '#tmpl-page-dot',
-  mixins: [pageStateMixin],
+// multiple page types result in rendering an SVG, so
+// some of that is abstracted into a shared mixin
+var pageSvgMixin = {
+  template: '#tmpl-page-svg',
   data () {
     return {
       svg: null
@@ -271,11 +279,41 @@ Vue.component('page-dot', {
   },
   updated () {
     svgPanZoom('#svg-target svg');
+  }
+}
+
+// renders an svg page from a .dot file
+Vue.component('page-dot', {
+  mixins: [pageStateMixin, pageSvgMixin],
+  updated () {
+    console.log('yep');
   },
   methods: {
     update: function () {
-      ajaxGet(this.item.baseUrl + "/" + this.file, (dotStr) => {
+      ajaxGet(this.contentUrl, (dotStr) => {
         var svg = Viz(dotStr);
+        this.svg = svg;
+      });
+    }
+  }
+});
+
+// renders an svg page from a .msgenny file
+Vue.component('page-msgenny', {
+  mixins: [pageStateMixin, pageSvgMixin],
+  methods: {
+    update: function () {
+      ajaxGet(this.contentUrl, (msgennyStr) => {
+        // create a tmp element to render the msgenny to, then fetch
+        // the generated svg, move it to the proper page target, and
+        // then remove the temporary element
+        var tmpEl = document.createElement('div');
+        tmpEl.id = 'msgenny-target';
+        document.body.appendChild(tmpEl);
+        const ast = window.msc.msgennyparser.parse(msgennyStr);
+        window.msc.mscrender.renderAST(ast, null, "msgenny-target", window);
+        const svg = tmpEl.innerHTML;
+        document.body.removeChild(tmpEl);
         this.svg = svg;
       });
     }
@@ -292,7 +330,7 @@ Vue.component('page-swaggerui', {
   },
   methods: {
     update: function() {
-      this.swaggerurl = '/_swagger-ui?path='+this.item.baseUrl+'/'+this.file;
+      this.swaggerurl = '/_swagger-ui?path='+this.contentUrl;
       var el = document.querySelector('#swaggerui iframe');
       if (el) {
         el.contentWindow.location.reload(true);
@@ -333,7 +371,8 @@ function choosePageComponent(item, name) {
   var comps = {
     'page-markdown': () => { return ('md' == name.toLowerCase().substr(-2)); },
     'page-dot': () => { return ('dot' == name.toLowerCase().substr(-3)); },
-    'page-swaggerui': () => { return (name == 'api.yml' || name == 'swagger.yml'); }
+    'page-msgenny': () => { return ('msgenny' == name.toLowerCase().substr(-7)); },
+    'page-swaggerui': () => { return (name.toLowerCase() == 'api.yml' || name.toLowerCase() == 'swagger.yml'); }
   }
 
   // first to match wins

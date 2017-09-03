@@ -29,6 +29,7 @@ function loadDocs(basePath, baseUrl, uiRoute) {
 
   //parse the doc
   doc.items = [];
+  doc.hidden = [];
   doc.nested = {};
   doc.baseUrl = baseUrl;
   doc.basePath = basePath;
