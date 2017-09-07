@@ -301,16 +301,18 @@ Vue.component('page-msgenny', {
   methods: {
     update: function () {
       ajaxGet(this.contentUrl, (msgennyStr) => {
+        let ast = window.msc.msgennyparser.parse(msgennyStr);
+
         // create a tmp element to render the msgenny to, then fetch
         // the generated svg, move it to the proper page target, and
         // then remove the temporary element
-        var tmpEl = document.createElement('div');
+        let tmpEl = document.createElement('div');
         tmpEl.id = 'msgenny-target';
         document.body.appendChild(tmpEl);
-        const ast = window.msc.msgennyparser.parse(msgennyStr);
         window.msc.mscrender.renderAST(ast, null, "msgenny-target", window);
-        const svg = tmpEl.innerHTML;
-        document.body.removeChild(tmpEl);
+        let svg = tmpEl.innerHTML;
+        tmpEl.remove();
+        
         this.svg = svg;
       });
     }
