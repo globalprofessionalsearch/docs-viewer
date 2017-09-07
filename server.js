@@ -9,6 +9,10 @@ var express = require('express');
 // TODO: add basic auth to everything, get user/pass from env variables
 
 const IGNORE = [
+  "Dockerfile",
+  "docker-compose.yml",
+  "makefile",
+  "Makefile",
   ".DS_Store",
   ".git",
   ".gitignore",

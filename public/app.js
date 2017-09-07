@@ -285,9 +285,6 @@ var pageSvgMixin = {
 // renders an svg page from a .dot file
 Vue.component('page-dot', {
   mixins: [pageStateMixin, pageSvgMixin],
-  updated () {
-    console.log('yep');
-  },
   methods: {
     update: function () {
       ajaxGet(this.contentUrl, (dotStr) => {
