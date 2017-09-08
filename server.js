@@ -5,6 +5,8 @@ var url = require('url');
 var http = require('http');
 var websocket = require('ws');
 var express = require('express');
+var basicAuth = require('express-basic-auth');
+
 
 // TODO: add basic auth to everything, get user/pass from env variables
 
@@ -71,6 +73,15 @@ function loadDocs(basePath, baseUrl, uiRoute) {
 
 // create the express server and define routes
 var app = express()
+
+// enable basic auth or not?
+if (process.env.AUTH_REQUIRED == "true") {
+  let users = {};
+  users[process.env.AUTH_USER] = process.env.AUTH_PASSWORD;
+  app.use(basicAuth({users: users, challenge: true}));
+}
+
+
 app.use('/_docs', express.static("/docs"));
 app.use('/_node_modules', express.static("/app/node_modules"));
 app.get('/_resources', function(req, res) {
