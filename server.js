@@ -7,9 +7,7 @@ var websocket = require('ws');
 var express = require('express');
 var basicAuth = require('express-basic-auth');
 
-
-// TODO: add basic auth to everything, get user/pass from env variables
-
+// TODO: this should be specified in .docs.json for the docs to serve, not here.
 const IGNORE = [
   "Dockerfile",
   "docker-compose.yml",
